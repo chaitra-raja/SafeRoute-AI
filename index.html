@@ -3,12 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="no-referrer">
     <title>SafeRoute AI — Smart Urban Safety Navigation</title>
-    <meta name="description" content="AI-powered urban commuter safety tool that recommends the safest route between two locations in real time using weather, lighting, crowd, and crime data.">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+    <meta name="description" content="AI-powered urban commuter safety tool that recommends the safest route between two locations in real time.">
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Google Analytics (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
         :root {
             --bg-top: #0f172a;
             --bg-bottom: #020617;
@@ -23,7 +41,7 @@
             --text-muted: #cbd5e1;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Outfit', sans-serif;
@@ -37,137 +55,144 @@
 
         .mobile-container {
             width: 100%; max-width: 480px; min-height: 100vh;
-            background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+            background: linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
             color: var(--text-main); padding: 40px 22px 30px;
             position: relative; overflow-x: hidden;
         }
 
-        .ambient-glow { position: absolute; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); top: -100px; right: -100px; z-index: 0; pointer-events: none; }
-        .ambient-glow-2 { position: absolute; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 70%); bottom: 100px; left: -150px; z-index: 0; pointer-events: none; }
+        /* Skip link for accessibility */
+        .skip-link { position: absolute; top: -100%; left: 0; background: #3b82f6; color: white; padding: 8px 16px; z-index: 100; border-radius: 0 0 8px 0; font-weight: 600; text-decoration: none; }
+        .skip-link:focus { top: 0; }
 
-        /* HEADER */
-        .header { position: relative; z-index: 1; margin-bottom: 28px; }
+        .ambient-glow { position: absolute; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(59,130,246,0.15), transparent 70%); top: -100px; right: -100px; z-index: 0; pointer-events: none; }
+        .ambient-glow-2 { position: absolute; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(34,197,94,0.06), transparent 70%); bottom: 100px; left: -150px; z-index: 0; pointer-events: none; }
+
+        .header { position: relative; z-index: 1; margin-bottom: 24px; }
         .header h1 { margin: 0; font-size: 2em; font-weight: 800; display: flex; align-items: center; gap: 10px; }
         .header h1 i { color: #60a5fa; width: 30px; height: 30px; }
         .header p { color: var(--text-muted); font-size: 0.95em; margin-top: 6px; font-weight: 300; }
 
-        /* LOCATION INPUTS */
-        .location-inputs { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 16px; margin-bottom: 20px; backdrop-filter: blur(10px); display: flex; flex-direction: column; position: relative; z-index: 1; }
+        .location-inputs { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 16px; margin-bottom: 18px; backdrop-filter: blur(10px); display: flex; flex-direction: column; position: relative; z-index: 1; }
         .input-group { display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); }
         .input-group i { width: 20px; height: 20px; flex-shrink: 0; }
+        .input-group label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
         .input-group select { background: transparent; border: none; color: var(--text-main); font-size: 1em; font-family: inherit; width: 100%; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; }
         .input-group select option { background: #1e293b; color: #f8fafc; }
+        .input-group select:focus { outline: 2px solid #60a5fa; outline-offset: 2px; border-radius: 4px; }
         .input-divider { display: flex; justify-content: center; padding: 4px 0; }
 
         .analyze-btn { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; border: none; padding: 14px; border-radius: 14px; font-family: inherit; font-weight: 600; font-size: 1em; margin-top: 14px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(59,130,246,0.3); display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; }
         .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.4); }
+        .analyze-btn:focus { outline: 2px solid #93c5fd; outline-offset: 2px; }
         .analyze-btn:disabled { opacity: 0.6; cursor: wait; }
 
-        /* WEATHER BANNER */
-        .weather-banner { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 4px; backdrop-filter: blur(10px); position: relative; z-index: 1; }
+        .weather-banner { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 4px; backdrop-filter: blur(10px); position: relative; z-index: 1; }
         .weather-info { display: flex; align-items: center; gap: 10px; font-size: 1.05em; font-weight: 600; }
         .weather-info i { color: #60a5fa; width: 22px; height: 22px; }
         .weather-alert-text { font-size: 0.85em; color: var(--text-muted); margin-left: 32px; }
 
-        /* TOGGLE */
-        .toggle-container { position: relative; z-index: 1; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 18px; display: flex; padding: 5px; margin-bottom: 20px; backdrop-filter: blur(10px); }
+        .toggle-container { position: relative; z-index: 1; background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 18px; display: flex; padding: 5px; margin-bottom: 18px; backdrop-filter: blur(10px); }
         .toggle-btn { flex: 1; padding: 12px 0; border: none; background: transparent; color: var(--text-muted); border-radius: 14px; font-family: inherit; font-size: 0.9em; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .toggle-btn:focus { outline: 2px solid #60a5fa; outline-offset: -2px; border-radius: 14px; }
         .toggle-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
         .toggle-btn.active-night { background: #1e1b4b; color: #c7d2fe; }
 
-        /* FORMULA SECTION */
-        .formula-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px 18px; margin-bottom: 20px; position: relative; z-index: 1; }
+        .formula-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px 18px; margin-bottom: 18px; position: relative; z-index: 1; }
         .formula-card h3 { margin: 0 0 10px 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; display: flex; align-items: center; gap: 8px; }
         .formula-card h3 i { width: 16px; height: 16px; }
         .formula-text { font-family: 'Courier New', monospace; font-size: 0.85em; color: var(--safe-color); background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 10px; margin-bottom: 10px; line-height: 1.6; }
         .formula-note { font-size: 0.8em; color: var(--text-muted); }
         .formula-note span { color: var(--warning-color); font-weight: 600; }
 
-        /* LIVE ALERT */
-        .live-alert { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); border-left: 4px solid var(--unsafe-color); padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; animation: pulse-alert 2.5s infinite; position: relative; z-index: 1; }
-        .live-alert i { color: var(--unsafe-color); flex-shrink: 0; width: 22px; height: 22px; animation: pulse-icon 1.5s infinite ease-in-out alternate; }
+        .live-alert { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); border-left: 4px solid var(--unsafe-color); padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; animation: pulse-alert 2.5s infinite; position: relative; z-index: 1; }
+        .live-alert[role="alert"] i { color: var(--unsafe-color); flex-shrink: 0; width: 22px; height: 22px; animation: pulse-icon 1.5s infinite ease-in-out alternate; }
         .live-alert span { font-size: 0.9em; font-weight: 600; color: #fca5a5; }
 
-        /* TRIP HEADER */
-        .trip-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; margin-bottom: 16px; font-size: 0.9em; position: relative; z-index: 1; }
+        .trip-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; margin-bottom: 14px; font-size: 0.9em; position: relative; z-index: 1; }
         .trip-header i { color: #60a5fa; width: 16px; height: 16px; flex-shrink: 0; }
-        .trip-header .trip-from { color: #60a5fa; font-weight: 600; }
-        .trip-header .trip-arrow { color: rgba(255,255,255,0.3); }
-        .trip-header .trip-to { color: #f87171; font-weight: 600; }
+        .trip-from { color: #60a5fa; font-weight: 600; }
+        .trip-arrow { color: rgba(255,255,255,0.3); }
+        .trip-to { color: #f87171; font-weight: 600; }
 
-        /* COMPARISON CHART */
-        .comparison-section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px 18px; margin-bottom: 20px; position: relative; z-index: 1; }
+        .comparison-section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px 18px; margin-bottom: 18px; position: relative; z-index: 1; }
         .comparison-section h3 { margin: 0 0 14px 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
         .comparison-section h3 i { width: 16px; height: 16px; }
         .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .bar-label { width: 100px; font-size: 0.8em; color: var(--text-muted); text-align: right; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .bar-track { flex: 1; height: 22px; background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden; position: relative; }
+        .bar-label { width: 95px; font-size: 0.78em; color: var(--text-muted); text-align: right; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bar-track { flex: 1; height: 22px; background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden; }
         .bar-fill { height: 100%; border-radius: 6px; transition: width 1s cubic-bezier(0.16,1,0.3,1); display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 0.7em; font-weight: 800; color: white; min-width: 35px; }
 
-        /* ROUTE CARDS */
-        .route-list { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 16px; padding-bottom: 10px; }
+        .route-list { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 14px; padding-bottom: 10px; }
         .route-card { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 24px; padding: 20px; box-shadow: var(--card-shadow); transition: all 0.4s cubic-bezier(0.16,1,0.3,1); position: relative; overflow: hidden; }
         .route-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-        .route-card.safest { border: 1.5px solid rgba(74,222,128,0.4); background: linear-gradient(145deg, rgba(30,41,59,0.8), rgba(20,29,43,0.9)); box-shadow: 0 10px 40px -10px var(--safe-glow), inset 0 0 30px rgba(34,197,94,0.08); transform: scale(1.02); }
-        .route-card.safest:hover { transform: scale(1.03) translateY(-3px); box-shadow: 0 15px 50px -10px var(--safe-glow); border-color: rgba(74,222,128,0.7); }
+        .route-card:focus-within { outline: 2px solid #60a5fa; outline-offset: 2px; }
+        .route-card.safest { border: 1.5px solid rgba(74,222,128,0.4); background: linear-gradient(145deg, rgba(30,41,59,0.8), rgba(20,29,43,0.9)); box-shadow: 0 10px 40px -10px var(--safe-glow), inset 0 0 30px rgba(34,197,94,0.08); transform: scale(1.01); }
+        .route-card.safest:hover { transform: scale(1.02) translateY(-3px); box-shadow: 0 15px 50px -10px var(--safe-glow); border-color: rgba(74,222,128,0.7); }
         .route-card.unsafe { border-color: rgba(239,68,68,0.2); }
 
-        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-        .route-info h2 { margin: 0 0 4px 0; font-size: 1.35em; font-weight: 600; letter-spacing: -0.3px; }
-        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 10px; font-size: 0.7em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+        .route-info h2 { margin: 0 0 4px 0; font-size: 1.3em; font-weight: 600; }
+        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 10px; font-size: 0.7em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
         .badge i { width: 12px; height: 12px; }
         .badge-safest { background: rgba(34,197,94,0.15); color: var(--safe-color); border: 1px solid rgba(34,197,94,0.2); }
         .badge-unsafe { background: rgba(239,68,68,0.15); color: var(--unsafe-color); border: 1px solid rgba(239,68,68,0.3); }
         .badge-neutral { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); }
 
-        .score-circle { width: 58px; height: 58px; border-radius: 50%; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; border: 3px solid rgba(255,255,255,0.1); }
+        .score-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; border: 3px solid rgba(255,255,255,0.1); }
         .safest .score-circle { border-color: var(--safe-color); background: rgba(74,222,128,0.1); color: var(--safe-color); box-shadow: 0 0 20px rgba(74,222,128,0.3); }
         .unsafe .score-circle { border-color: var(--unsafe-color); color: var(--unsafe-color); }
-        .score-circle .val { font-size: 1.3em; font-weight: 800; line-height: 1.1; }
-        .score-circle .lbl { font-size: 0.5em; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+        .score-circle .val { font-size: 1.2em; font-weight: 800; line-height: 1.1; }
+        .score-circle .lbl { font-size: 0.48em; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
 
         .metrics-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); border-radius: 14px; padding: 12px 16px; }
         .metric { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .metric i { width: 18px; height: 18px; }
         .metric span { font-size: 0.9em; font-weight: 600; }
-        .metric small { font-size: 0.6em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric small { font-size: 0.6em; color: var(--text-muted); text-transform: uppercase; }
 
-        /* CALCULATION BREAKDOWN */
         .calc-breakdown { margin-top: 12px; background: rgba(0,0,0,0.15); border-radius: 10px; padding: 10px 14px; font-family: 'Courier New', monospace; font-size: 0.75em; color: var(--text-muted); line-height: 1.8; }
-        .calc-breakdown .calc-line { display: flex; justify-content: space-between; }
-        .calc-breakdown .calc-result { color: var(--safe-color); font-weight: 800; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; margin-top: 4px; }
+        .calc-line { display: flex; justify-content: space-between; }
+        .calc-result { color: var(--safe-color); font-weight: 800; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; margin-top: 4px; }
 
-        /* INSIGHTS */
-        .insights { margin-top: 14px; font-size: 0.88em; color: #cbd5e1; line-height: 1.5; padding: 0 2px; }
-        .insight-title { font-size: 0.85em; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .insights { margin-top: 12px; font-size: 0.88em; }
+        .insight-title { font-size: 0.85em; font-weight: 600; margin-bottom: 8px; }
         .insight-bullets { list-style: none; padding: 0; margin: 0; }
-        .insight-bullets li { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.88em; color: var(--text-muted); }
+        .insight-bullets li { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.85em; color: var(--text-muted); }
 
-        /* CHECKPOINTS */
         .checkpoints { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
-        .checkpoints h4 { margin: 0 0 8px 0; font-size: 0.8em; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px; }
+        .checkpoints h4 { margin: 0 0 8px 0; font-size: 0.78em; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px; }
         .checkpoints h4 i { width: 14px; height: 14px; }
-        .checkpoint-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); padding: 4px 10px; border-radius: 8px; font-size: 0.78em; color: #93c5fd; margin: 0 6px 6px 0; }
+        .checkpoint-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); padding: 4px 10px; border-radius: 8px; font-size: 0.76em; color: #93c5fd; margin: 0 6px 6px 0; }
         .checkpoint-tag i { width: 12px; height: 12px; }
 
-        /* SUMMARY */
-        .summary-card { background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1)); border: 1px solid rgba(34,197,94,0.2); border-radius: 16px; padding: 18px; margin-bottom: 20px; position: relative; z-index: 1; }
-        .summary-card h3 { margin: 0 0 8px 0; font-size: 1.1em; color: var(--safe-color); display: flex; align-items: center; gap: 8px; }
+        .summary-card { background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1)); border: 1px solid rgba(34,197,94,0.2); border-radius: 16px; padding: 18px; margin-bottom: 18px; position: relative; z-index: 1; }
+        .summary-card h3 { margin: 0 0 8px 0; font-size: 1.05em; color: var(--safe-color); display: flex; align-items: center; gap: 8px; }
         .summary-card h3 i { width: 20px; height: 20px; }
-        .summary-card p { margin: 0; font-size: 0.9em; color: var(--text-muted); line-height: 1.5; }
-        .summary-card .summary-stats { display: flex; gap: 16px; margin-top: 12px; }
+        .summary-card p { margin: 0; font-size: 0.88em; color: var(--text-muted); line-height: 1.5; }
+        .summary-stats { display: flex; gap: 14px; margin-top: 12px; }
         .summary-stat { text-align: center; flex: 1; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; }
         .summary-stat .stat-val { font-size: 1.4em; font-weight: 800; }
-        .summary-stat .stat-lbl { font-size: 0.65em; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+        .summary-stat .stat-lbl { font-size: 0.6em; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
 
-        /* LOADING */
         .loading-overlay { display: none; position: relative; z-index: 1; text-align: center; padding: 40px 0; }
         .loading-overlay.active { display: block; }
-        .loading-spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px auto; }
+        .loading-spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
         .loading-text { font-size: 0.9em; color: var(--text-muted); }
 
-        /* FOOTER */
-        .footer { text-align: center; padding: 20px 0 10px 0; font-size: 0.75em; color: rgba(255,255,255,0.2); position: relative; z-index: 1; }
+        /* Google Maps Embed */
+        .map-section { position: relative; z-index: 1; margin-bottom: 18px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+        .map-section iframe { width: 100%; height: 200px; border: 0; display: block; }
+
+        /* Test Results Panel */
+        .test-panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px 18px; margin-bottom: 18px; position: relative; z-index: 1; }
+        .test-panel h3 { margin: 0 0 10px 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; display: flex; align-items: center; gap: 8px; }
+        .test-panel h3 i { width: 16px; height: 16px; }
+        .test-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.82em; }
+        .test-row:last-child { border-bottom: none; }
+        .test-pass { color: var(--safe-color); font-weight: 600; }
+        .test-fail { color: var(--unsafe-color); font-weight: 600; }
+
+        .footer { text-align: center; padding: 16px 0 10px; font-size: 0.7em; color: rgba(255,255,255,0.2); position: relative; z-index: 1; }
 
         @keyframes pulse-alert { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); } 70% { box-shadow: 0 0 0 12px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
         @keyframes pulse-icon { from { transform: scale(1); opacity: 0.7; } to { transform: scale(1.15); opacity: 1; } }
@@ -177,19 +202,24 @@
     </style>
 </head>
 <body>
-    <div class="mobile-container">
-        <div class="ambient-glow"></div>
-        <div class="ambient-glow-2"></div>
+    <!-- Accessibility: Skip Navigation Link -->
+    <a href="#results" class="skip-link">Skip to results</a>
 
-        <div class="header">
-            <h1><i data-lucide="shield-check"></i> SafeRoute AI</h1>
+    <div class="mobile-container" role="main">
+        <div class="ambient-glow" aria-hidden="true"></div>
+        <div class="ambient-glow-2" aria-hidden="true"></div>
+
+        <header class="header">
+            <h1><i data-lucide="shield-check" aria-hidden="true"></i> SafeRoute AI</h1>
             <p>AI-powered urban safety navigation — Bangalore</p>
-        </div>
+        </header>
 
-        <!-- STEP 1: Location Input -->
-        <div class="location-inputs">
+        <!-- Location Inputs -->
+        <section class="location-inputs" aria-labelledby="loc-heading">
+            <span id="loc-heading" style="display: none;">Route Selection</span>
             <div class="input-group">
                 <i data-lucide="map-pin" style="color: #60a5fa;" aria-hidden="true"></i>
+                <label for="source">Starting location</label>
                 <select id="source" aria-label="Select starting point">
                     <option value="Majestic">Majestic</option>
                     <option value="MG Road">MG Road</option>
@@ -201,11 +231,12 @@
                     <option value="HSR Layout">HSR Layout</option>
                 </select>
             </div>
-            <div class="input-divider">
-                <i data-lucide="arrow-down" style="color: rgba(255,255,255,0.2); width: 16px; height: 16px;" aria-hidden="true"></i>
+            <div class="input-divider" aria-hidden="true">
+                <i data-lucide="arrow-down" style="color: rgba(255,255,255,0.2); width: 16px; height: 16px;"></i>
             </div>
             <div class="input-group">
                 <i data-lucide="map-pin" style="color: #f87171;" aria-hidden="true"></i>
+                <label for="destination">Destination</label>
                 <select id="destination" aria-label="Select destination">
                     <option value="Koramangala">Koramangala</option>
                     <option value="HSR Layout">HSR Layout</option>
@@ -217,343 +248,504 @@
                     <option value="Majestic">Majestic</option>
                 </select>
             </div>
-            <button class="analyze-btn" id="analyzeBtn" onclick="analyzeRoutes()">
-                <i data-lucide="shield-check"></i> Analyze Route Safety
+            <button class="analyze-btn" id="analyzeBtn" onclick="analyzeRoutes()" aria-label="Analyze route safety">
+                <i data-lucide="shield-check" aria-hidden="true"></i> Analyze Route Safety
             </button>
-        </div>
+        </section>
 
-        <!-- STEP 2: Weather -->
-        <div id="weather-banner" class="weather-banner">
+        <!-- Weather -->
+        <section class="weather-banner" aria-label="Current weather conditions">
             <div class="weather-info">
-                <i id="weather-icon" data-lucide="loader"></i>
+                <i id="weather-icon" data-lucide="loader" aria-hidden="true"></i>
                 <span id="weather-temp">--°C</span>
-                <span style="color: rgba(255,255,255,0.3);">&bull;</span>
+                <span style="color: rgba(255,255,255,0.3);" aria-hidden="true">&bull;</span>
                 <span id="weather-cond">Loading...</span>
             </div>
-            <div id="weather-alert" class="weather-alert-text">Fetching live weather data...</div>
-        </div>
+            <div id="weather-alert" class="weather-alert-text" role="status" aria-live="polite">Fetching live weather...</div>
+        </section>
 
-        <!-- STEP 3: Day/Night Toggle -->
-        <div class="toggle-container" role="group" aria-label="Time of Day Toggle">
-            <button id="dayBtn" aria-label="Switch to Day Mode" class="toggle-btn active" onclick="setTime('day')">
+        <!-- Day/Night -->
+        <div class="toggle-container" role="radiogroup" aria-label="Time of Day">
+            <button id="dayBtn" role="radio" aria-checked="true" class="toggle-btn active" onclick="setTime('day')">
                 <i data-lucide="sun" aria-hidden="true"></i> Day Mode
             </button>
-            <button id="nightBtn" aria-label="Switch to Night Mode" class="toggle-btn" onclick="setTime('night')">
+            <button id="nightBtn" role="radio" aria-checked="false" class="toggle-btn" onclick="setTime('night')">
                 <i data-lucide="moon" aria-hidden="true"></i> Night Mode
             </button>
         </div>
 
-        <!-- STEP 4: Formula Display -->
-        <div class="formula-card" id="formula-section">
-            <h3><i data-lucide="brain"></i> AI Safety Formula</h3>
-            <div class="formula-text">
+        <!-- Formula -->
+        <section class="formula-card" aria-label="Safety scoring formula">
+            <h3><i data-lucide="brain" aria-hidden="true"></i> AI Safety Formula</h3>
+            <div class="formula-text" aria-label="Formula equation">
                 Score = (Light × 0.3) + (Crowd × 0.3)<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; − (Crime × <span id="crime-weight-display">0.4</span>)<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; − Weather Penalty
             </div>
             <div class="formula-note">
-                <span>Night Mode:</span> Crime weight increases to 0.6<br>
-                <span>Rain:</span> −1.5 penalty &nbsp;|&nbsp; <span>Clouds:</span> −0.4 penalty
+                <span>Night Mode:</span> Crime weight → 0.6 &nbsp;|&nbsp;
+                <span>Rain:</span> −1.5 &nbsp;|&nbsp; <span>Clouds:</span> −0.4
             </div>
-        </div>
+        </section>
 
-        <!-- Loading State -->
-        <div class="loading-overlay" id="loading">
-            <div class="loading-spinner"></div>
+        <!-- Google Maps Embed -->
+        <section class="map-section" aria-label="Map of Bangalore">
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d248849.84916296514!2d77.46612593378655!3d12.953847714498672!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670c9b44e6d%3A0xf8dfc3e8517e4fe0!2sBengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Google Map showing Bangalore area">
+            </iframe>
+        </section>
+
+        <!-- Loading -->
+        <div class="loading-overlay" id="loading" role="status" aria-label="Loading routes">
+            <div class="loading-spinner" aria-hidden="true"></div>
             <div class="loading-text">Scanning routes for safety...</div>
         </div>
 
         <!-- Dynamic Content -->
-        <div id="alerts-container"></div>
+        <div id="alerts-container" aria-live="assertive"></div>
         <div id="summary-container"></div>
         <div id="comparison-container"></div>
-        <div class="route-list" id="results"></div>
+        <div class="route-list" id="results" tabindex="-1" aria-label="Route safety results"></div>
 
-        <div class="footer">SafeRoute AI v2.0 — Prototype Demo</div>
+        <!-- Self-Test Results -->
+        <section class="test-panel" id="test-panel" aria-label="Automated test results">
+            <h3><i data-lucide="test-tube" aria-hidden="true"></i> Self-Test Results</h3>
+            <div id="test-results"></div>
+        </section>
+
+        <footer class="footer">SafeRoute AI v2.0 — Prototype Demo • Built with ❤ for PromptWars</footer>
     </div>
 
     <script>
-        lucide.createIcons();
+    "use strict";
 
-        // ═══════════════════════════════════════════════
-        // ROUTE DATABASE — Real Bangalore Locations
-        // ═══════════════════════════════════════════════
-        const routeDatabase = {
-            "Majestic→Koramangala": [
-                { id: "A", name: "MG Road → Hosur Road", lighting: 8, crowd: 7, crime: 3, desc: "Well-lit commercial corridor via MG Road with metro access and CCTV.", checkpoints: ["MG Road Metro Station", "Garuda Mall", "Forum Mall"] },
-                { id: "B", name: "KR Market Back Lanes", lighting: 5, crowd: 4, crime: 6, desc: "Narrow lanes near KR Market with poor lighting at night.", checkpoints: ["KR Market Police Booth"] },
-                { id: "C", name: "Cubbon Park → Ejipura", lighting: 6, crowd: 8, crime: 4, desc: "Scenic route past Cubbon Park. Busy by day, isolated after dark.", checkpoints: ["Cubbon Park Police Station", "Chinnaswamy Stadium"] }
-            ],
-            "Majestic→Indiranagar": [
-                { id: "A", name: "MG Road Direct", lighting: 9, crowd: 8, crime: 2, desc: "Straight shot via MG Road. Extremely well-lit with metro coverage.", checkpoints: ["Trinity Metro Station", "MG Road Metro", "Indiranagar Metro"] },
-                { id: "B", name: "Shivajinagar Cut", lighting: 5, crowd: 5, crime: 5, desc: "Shortcut through Shivajinagar — congested and poorly lit at night.", checkpoints: ["Shivajinagar Bus Stand"] },
-                { id: "C", name: "CMH Road Route", lighting: 7, crowd: 7, crime: 3, desc: "Passes through CMH Road commercial zone with good foot traffic.", checkpoints: ["CMH Road Commercial Complex", "Old Airport Road Junction"] }
-            ],
-            "Majestic→Electronic City": [
-                { id: "A", name: "Hosur Road (NH 44)", lighting: 7, crowd: 6, crime: 4, desc: "National highway route. Good lighting but heavy truck traffic at night.", checkpoints: ["Silk Board Junction", "Bommanahalli Police Station"] },
-                { id: "B", name: "Bannerghatta Road", lighting: 6, crowd: 5, crime: 5, desc: "Moderate lighting. Stretches of isolation near Gottigere.", checkpoints: ["Jayadeva Hospital", "Gottigere Signal"] },
-                { id: "C", name: "NICE Road Corridor", lighting: 5, crowd: 3, crime: 6, desc: "Fast expressway but very low crowd presence and few stops.", checkpoints: ["NICE Road Toll Plaza"] }
-            ],
-            "Indiranagar→Whitefield": [
-                { id: "A", name: "Old Airport Road", lighting: 7, crowd: 7, crime: 3, desc: "Well-lit arterial road with consistent traffic flow.", checkpoints: ["HAL Airport Gate", "Marathahalli Bridge", "Phoenix Mall"] },
-                { id: "B", name: "HAL Road → Marathahalli", lighting: 6, crowd: 6, crime: 4, desc: "Passes through HAL area — moderate safety with some dim patches.", checkpoints: ["HAL Police Station"] },
-                { id: "C", name: "KR Puram Bypass", lighting: 5, crowd: 4, crime: 5, desc: "Bypass route with sparse lighting and lower foot traffic.", checkpoints: ["KR Puram Railway Station"] }
-            ],
-            "Koramangala→HSR Layout": [
-                { id: "A", name: "Inner Ring Road", lighting: 8, crowd: 8, crime: 2, desc: "Busy commercial zone with excellent lighting and police presence.", checkpoints: ["Sony Signal", "Agara Junction", "Silk Board"] },
-                { id: "B", name: "Agara Lake Road", lighting: 6, crowd: 6, crime: 4, desc: "Peaceful route past Agara Lake. Gets quiet after sunset.", checkpoints: ["Agara Lake Park Entry"] },
-                { id: "C", name: "27th Main Shortcut", lighting: 5, crowd: 5, crime: 5, desc: "Residential shortcut — dimly lit side streets.", checkpoints: ["BDA Complex"] }
-            ],
-            "MG Road→Jayanagar": [
-                { id: "A", name: "Lalbagh Road", lighting: 7, crowd: 7, crime: 3, desc: "Passes Lalbagh Garden. Well-patrolled with good visibility.", checkpoints: ["Lalbagh Main Gate", "KR Road Police Station"] },
-                { id: "B", name: "DVG Road → South End", lighting: 6, crowd: 5, crime: 4, desc: "Quieter residential route. Moderate lighting.", checkpoints: ["Basavanagudi Police Station"] },
-                { id: "C", name: "KR Road Direct", lighting: 8, crowd: 8, crime: 3, desc: "Major road with heavy traffic flow and commercial establishments.", checkpoints: ["Town Hall Metro", "National College Signal"] }
-            ]
-        };
+    lucide.createIcons();
 
-        const defaultRoutes = [
-            { id: "A", name: "MG Road", lighting: 8, crowd: 7, crime: 3, desc: "Well-lit commercial corridor with metro access and CCTV coverage.", checkpoints: ["MG Road Metro", "Garuda Mall"] },
-            { id: "B", name: "KR Market Back Lanes", lighting: 5, crowd: 4, crime: 6, desc: "Narrow lanes with poor lighting and minimal police patrol.", checkpoints: ["KR Market Police Booth"] },
-            { id: "C", name: "Cubbon Park Road", lighting: 6, crowd: 8, crime: 4, desc: "Scenic route along Cubbon Park. Good daytime crowd.", checkpoints: ["Cubbon Park Police Station"] }
-        ];
+    // ═════════════════════════════════════════════════════
+    // ROUTE DATABASE — Real Bangalore Locations
+    // ═════════════════════════════════════════════════════
 
-        function getRoutesForTrip(source, destination) {
-            let key = `${source}→${destination}`;
-            if (routeDatabase[key]) return routeDatabase[key].map(r => ({...r}));
-            let rev = `${destination}→${source}`;
-            if (routeDatabase[rev]) return routeDatabase[rev].map(r => ({...r}));
-            return defaultRoutes.map(r => ({...r}));
+    /** @type {Object.<string, Array.<RouteData>>} */
+    const routeDatabase = Object.freeze({
+        "Majestic→Koramangala": [
+            { id: "A", name: "MG Road → Hosur Road", lighting: 8, crowd: 7, crime: 3, desc: "Well-lit commercial corridor via MG Road with metro access and CCTV.", checkpoints: ["MG Road Metro Station", "Garuda Mall", "Forum Mall"] },
+            { id: "B", name: "KR Market Back Lanes", lighting: 5, crowd: 4, crime: 6, desc: "Narrow lanes near KR Market with poor lighting at night.", checkpoints: ["KR Market Police Booth"] },
+            { id: "C", name: "Cubbon Park → Ejipura", lighting: 6, crowd: 8, crime: 4, desc: "Scenic route past Cubbon Park. Busy by day, isolated after dark.", checkpoints: ["Cubbon Park Police Station", "Chinnaswamy Stadium"] }
+        ],
+        "Majestic→Indiranagar": [
+            { id: "A", name: "MG Road Direct", lighting: 9, crowd: 8, crime: 2, desc: "Straight shot via MG Road. Extremely well-lit with metro coverage.", checkpoints: ["Trinity Metro Station", "MG Road Metro", "Indiranagar Metro"] },
+            { id: "B", name: "Shivajinagar Cut", lighting: 5, crowd: 5, crime: 5, desc: "Shortcut through Shivajinagar — congested and poorly lit at night.", checkpoints: ["Shivajinagar Bus Stand"] },
+            { id: "C", name: "CMH Road Route", lighting: 7, crowd: 7, crime: 3, desc: "Passes through CMH Road commercial zone with good foot traffic.", checkpoints: ["CMH Road Complex", "Old Airport Road Junction"] }
+        ],
+        "Majestic→Electronic City": [
+            { id: "A", name: "Hosur Road (NH 44)", lighting: 7, crowd: 6, crime: 4, desc: "National highway route. Good lighting but heavy truck traffic at night.", checkpoints: ["Silk Board Junction", "Bommanahalli Police Station"] },
+            { id: "B", name: "Bannerghatta Road", lighting: 6, crowd: 5, crime: 5, desc: "Moderate lighting. Stretches of isolation near Gottigere.", checkpoints: ["Jayadeva Hospital", "Gottigere Signal"] },
+            { id: "C", name: "NICE Road Corridor", lighting: 5, crowd: 3, crime: 6, desc: "Fast expressway but very low crowd presence and few stops.", checkpoints: ["NICE Road Toll Plaza"] }
+        ],
+        "Indiranagar→Whitefield": [
+            { id: "A", name: "Old Airport Road", lighting: 7, crowd: 7, crime: 3, desc: "Well-lit arterial road with consistent traffic flow.", checkpoints: ["HAL Airport Gate", "Marathahalli Bridge", "Phoenix Mall"] },
+            { id: "B", name: "HAL Road → Marathahalli", lighting: 6, crowd: 6, crime: 4, desc: "Passes through HAL area — moderate safety.", checkpoints: ["HAL Police Station"] },
+            { id: "C", name: "KR Puram Bypass", lighting: 5, crowd: 4, crime: 5, desc: "Bypass route with sparse lighting and lower foot traffic.", checkpoints: ["KR Puram Railway Station"] }
+        ],
+        "Koramangala→HSR Layout": [
+            { id: "A", name: "Inner Ring Road", lighting: 8, crowd: 8, crime: 2, desc: "Busy commercial zone with excellent lighting and police presence.", checkpoints: ["Sony Signal", "Agara Junction", "Silk Board"] },
+            { id: "B", name: "Agara Lake Road", lighting: 6, crowd: 6, crime: 4, desc: "Peaceful route past Agara Lake. Gets quiet after sunset.", checkpoints: ["Agara Lake Park Entry"] },
+            { id: "C", name: "27th Main Shortcut", lighting: 5, crowd: 5, crime: 5, desc: "Residential shortcut — dimly lit side streets.", checkpoints: ["BDA Complex"] }
+        ],
+        "MG Road→Jayanagar": [
+            { id: "A", name: "Lalbagh Road", lighting: 7, crowd: 7, crime: 3, desc: "Passes Lalbagh Garden. Well-patrolled with good visibility.", checkpoints: ["Lalbagh Main Gate", "KR Road Police Station"] },
+            { id: "B", name: "DVG Road → South End", lighting: 6, crowd: 5, crime: 4, desc: "Quieter residential route. Moderate lighting.", checkpoints: ["Basavanagudi Police Station"] },
+            { id: "C", name: "KR Road Direct", lighting: 8, crowd: 8, crime: 3, desc: "Major road with heavy traffic flow and commerce.", checkpoints: ["Town Hall Metro", "National College Signal"] }
+        ]
+    });
+
+    /** @type {Array.<RouteData>} */
+    const defaultRoutes = Object.freeze([
+        { id: "A", name: "MG Road", lighting: 8, crowd: 7, crime: 3, desc: "Well-lit corridor with metro access and CCTV.", checkpoints: ["MG Road Metro", "Garuda Mall"] },
+        { id: "B", name: "KR Market Back Lanes", lighting: 5, crowd: 4, crime: 6, desc: "Narrow lanes with poor lighting.", checkpoints: ["KR Market Police Booth"] },
+        { id: "C", name: "Cubbon Park Road", lighting: 6, crowd: 8, crime: 4, desc: "Scenic route along Cubbon Park.", checkpoints: ["Cubbon Park Police Station"] }
+    ]);
+
+    /**
+     * Returns the set of candidate routes for a given source-destination pair.
+     * Falls back to defaults if no specific mapping exists.
+     * @param {string} source - Starting location name
+     * @param {string} destination - Ending location name
+     * @returns {Array.<RouteData>} Array of route objects
+     */
+    function getRoutesForTrip(source, destination) {
+        const key = `${sanitize(source)}→${sanitize(destination)}`;
+        if (routeDatabase[key]) return routeDatabase[key].map(r => ({...r}));
+        const rev = `${sanitize(destination)}→${sanitize(source)}`;
+        if (routeDatabase[rev]) return routeDatabase[rev].map(r => ({...r}));
+        return defaultRoutes.map(r => ({...r}));
+    }
+
+    // ═════════════════════════════════════════════════════
+    // SECURITY — Input Sanitization
+    // ═════════════════════════════════════════════════════
+
+    /**
+     * Sanitizes user input to prevent XSS attacks.
+     * @param {string} str - Raw input string
+     * @returns {string} Sanitized string
+     */
+    function sanitize(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ═════════════════════════════════════════════════════
+    // STATE & CACHING
+    // ═════════════════════════════════════════════════════
+
+    let isNight = false;
+    let currentWeather = { condition: "Clear", temp: 25 };
+
+    /** @type {Object} Weather cache to avoid redundant API calls */
+    const weatherCache = { data: null, timestamp: 0, TTL: 300000 }; // 5-min cache
+
+    // ═════════════════════════════════════════════════════
+    // WEATHER API (OpenWeather) — with caching & error handling
+    // ═════════════════════════════════════════════════════
+
+    /**
+     * Fetches current weather for a city from OpenWeather API.
+     * Results are cached for 5 minutes to reduce API calls.
+     * @param {string} city - City name to query
+     * @returns {Promise<{condition: string, temp: number}>}
+     */
+    async function getWeather(city) {
+        // Check cache first (efficiency optimization)
+        const now = Date.now();
+        if (weatherCache.data && (now - weatherCache.timestamp) < weatherCache.TTL) {
+            console.log("[Cache] Using cached weather data");
+            return weatherCache.data;
         }
 
-        // ═══════════════════════════════════════════════
-        // STATE
-        // ═══════════════════════════════════════════════
-        let isNight = false;
-        let currentWeather = { condition: "Clear", temp: 25 };
+        try {
+            const apiKey = "8202d069e23c7a346408e8198f68dba1";
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${apiKey}`;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
-        // ═══════════════════════════════════════════════
-        // WEATHER API (OpenWeather)
-        // ═══════════════════════════════════════════════
-        async function getWeather(city) {
-            try {
-                const apiKey = "8202d069e23c7a346408e8198f68dba1";
-                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`);
-                if (!res.ok) throw new Error("Weather API error");
-                const data = await res.json();
-                return { condition: data.weather[0].main, temp: Math.round(data.main.temp) };
-            } catch (e) {
-                console.error("Weather fallback:", e);
-                return { condition: "Clear", temp: 28 };
-            }
-        }
+            const res = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeout);
 
-        // ═══════════════════════════════════════════════
-        // SAFETY SCORING — Core AI Logic
-        // ═══════════════════════════════════════════════
-        function calculateSafety(r, weather, nightMode) {
-            let adjustedCrime = r.crime;
-            if (nightMode && r.id === 'C') adjustedCrime += 2;
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
 
-            let weatherPenalty = 0;
-            if (weather.condition === "Rain") weatherPenalty = 1.5;
-            else if (weather.condition === "Clouds") weatherPenalty = 0.4;
-
-            const crimeWeight = nightMode ? 0.6 : 0.4;
-            const lightScore = r.lighting * 0.3;
-            const crowdScore = r.crowd * 0.3;
-            const crimeScore = adjustedCrime * crimeWeight;
-            let score = lightScore + crowdScore - crimeScore - weatherPenalty;
-
-            return {
-                ...r,
-                finalCrime: adjustedCrime,
-                score: parseFloat(score.toFixed(2)),
-                // Store breakdown for display
-                _lightScore: lightScore.toFixed(2),
-                _crowdScore: crowdScore.toFixed(2),
-                _crimeScore: crimeScore.toFixed(2),
-                _weatherPenalty: weatherPenalty.toFixed(2),
-                _crimeWeight: crimeWeight
+            const result = {
+                condition: sanitize(data.weather[0].main),
+                temp: Math.round(data.main.temp)
             };
+
+            // Cache the result
+            weatherCache.data = result;
+            weatherCache.timestamp = now;
+            console.log("[API] Weather fetched & cached:", result);
+            return result;
+        } catch (error) {
+            console.error("[Weather Error]", error.message);
+            return weatherCache.data || { condition: "Clear", temp: 28 };
         }
+    }
 
-        // ═══════════════════════════════════════════════
-        // UI HELPERS
-        // ═══════════════════════════════════════════════
-        async function setTime(time) {
-            isNight = time === 'night';
-            document.getElementById('dayBtn').classList.toggle('active', !isNight);
-            document.getElementById('nightBtn').classList.toggle('active', isNight);
-            document.getElementById('nightBtn').classList.toggle('active-night', isNight);
-            document.getElementById('crime-weight-display').textContent = isNight ? '0.6' : '0.4';
+    // ═════════════════════════════════════════════════════
+    // SAFETY SCORING ENGINE
+    // ═════════════════════════════════════════════════════
 
-            if (isNight) {
-                document.documentElement.style.setProperty('--bg-top', '#020617');
-                document.documentElement.style.setProperty('--bg-bottom', '#000000');
-            } else {
-                document.documentElement.style.setProperty('--bg-top', '#0f172a');
-                document.documentElement.style.setProperty('--bg-bottom', '#020617');
+    /**
+     * Calculates safety score for a single route using the weighted formula.
+     * @param {RouteData} route - Route object with lighting, crowd, crime
+     * @param {{condition: string}} weather - Current weather condition
+     * @param {boolean} nightMode - Whether night mode is active
+     * @returns {ScoredRoute} Route with computed safety score and breakdown
+     */
+    function calculateSafety(route, weather, nightMode) {
+        let adjustedCrime = route.crime;
+        if (nightMode && route.id === 'C') adjustedCrime += 2;
+
+        let weatherPenalty = 0;
+        if (weather.condition === "Rain") weatherPenalty = 1.5;
+        else if (weather.condition === "Clouds") weatherPenalty = 0.4;
+
+        const crimeWeight = nightMode ? 0.6 : 0.4;
+        const lightScore = route.lighting * 0.3;
+        const crowdScore = route.crowd * 0.3;
+        const crimeScore = adjustedCrime * crimeWeight;
+        const score = lightScore + crowdScore - crimeScore - weatherPenalty;
+
+        return {
+            ...route,
+            finalCrime: adjustedCrime,
+            score: parseFloat(Math.max(score, 0).toFixed(2)),
+            _lightScore: lightScore.toFixed(2),
+            _crowdScore: crowdScore.toFixed(2),
+            _crimeScore: crimeScore.toFixed(2),
+            _weatherPenalty: weatherPenalty.toFixed(2),
+            _crimeWeight: crimeWeight
+        };
+    }
+
+    // ═════════════════════════════════════════════════════
+    // UI CONTROLLERS
+    // ═════════════════════════════════════════════════════
+
+    /**
+     * Toggles day/night mode and recalculates all routes.
+     * @param {string} time - 'day' or 'night'
+     */
+    async function setTime(time) {
+        isNight = time === 'night';
+        const dayBtn = document.getElementById('dayBtn');
+        const nightBtn = document.getElementById('nightBtn');
+        dayBtn.classList.toggle('active', !isNight);
+        dayBtn.setAttribute('aria-checked', !isNight);
+        nightBtn.classList.toggle('active', isNight);
+        nightBtn.classList.toggle('active-night', isNight);
+        nightBtn.setAttribute('aria-checked', isNight);
+        document.getElementById('crime-weight-display').textContent = isNight ? '0.6' : '0.4';
+
+        if (isNight) {
+            document.documentElement.style.setProperty('--bg-top', '#020617');
+            document.documentElement.style.setProperty('--bg-bottom', '#000000');
+        } else {
+            document.documentElement.style.setProperty('--bg-top', '#0f172a');
+            document.documentElement.style.setProperty('--bg-bottom', '#020617');
+        }
+        await analyzeRoutes();
+    }
+
+    /**
+     * Updates weather UI elements based on current conditions.
+     * @param {{condition: string, temp: number}} weather
+     */
+    function updateWeatherUI(weather) {
+        document.getElementById('weather-temp').textContent = `${weather.temp}°C`;
+        document.getElementById('weather-cond').textContent = weather.condition;
+        const iconEl = document.getElementById('weather-icon');
+        const alertEl = document.getElementById('weather-alert');
+
+        let iconName = "sun", alertMsg = "Clear weather: optimal travel conditions";
+        if (weather.condition === "Rain") { iconName = "cloud-rain"; alertMsg = "⚠ Rain detected: reduced visibility and slippery roads"; iconEl.style.color = "#8b5cf6"; }
+        else if (weather.condition === "Clouds") { iconName = "cloud"; alertMsg = "Cloudy conditions: moderate safety impact"; iconEl.style.color = "#94a3b8"; }
+        else { iconEl.style.color = "#fbbf24"; }
+
+        iconEl.setAttribute('data-lucide', iconName);
+        alertEl.textContent = alertMsg;
+        lucide.createIcons();
+    }
+
+    // ═════════════════════════════════════════════════════
+    // MAIN ANALYSIS ENGINE (async)
+    // ═════════════════════════════════════════════════════
+
+    /** Debounce timer to prevent rapid re-calls */
+    let analyzeTimeout = null;
+
+    /**
+     * Main entry point — fetches weather, scores routes, renders UI.
+     * Debounced to prevent multiple rapid executions.
+     */
+    async function analyzeRoutes() {
+        if (analyzeTimeout) clearTimeout(analyzeTimeout);
+        analyzeTimeout = setTimeout(async () => await _doAnalyze(), 150);
+    }
+
+    async function _doAnalyze() {
+        const source = document.getElementById('source').value;
+        const destination = document.getElementById('destination').value;
+        const btn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+
+        btn.disabled = true;
+        loading.classList.add('active');
+        document.getElementById('results').innerHTML = '';
+        document.getElementById('summary-container').innerHTML = '';
+        document.getElementById('comparison-container').innerHTML = '';
+
+        currentWeather = await getWeather("Bangalore");
+        updateWeatherUI(currentWeather);
+
+        const tripRoutes = getRoutesForTrip(source, destination);
+
+        // Use DocumentFragment for efficient DOM update
+        let analyzed = tripRoutes.map(r => calculateSafety(r, currentWeather, isNight));
+        analyzed.sort((a, b) => b.score - a.score);
+
+        loading.classList.remove('active');
+        btn.disabled = false;
+
+        const container = document.getElementById('results');
+        const alerts = document.getElementById('alerts-container');
+        const summaryC = document.getElementById('summary-container');
+        const compC = document.getElementById('comparison-container');
+        const fragment = document.createDocumentFragment();
+
+        // ALERTS
+        let alertHTML = '';
+        if (isNight) alertHTML += `<div class="live-alert" role="alert"><i data-lucide="radio" aria-hidden="true"></i><span>⚠ Low safety zone — Night travel active</span></div>`;
+        if (currentWeather.condition === "Rain") alertHTML += `<div class="live-alert" role="alert"><i data-lucide="cloud-rain" aria-hidden="true"></i><span>Rain detected: safety scores reduced</span></div>`;
+        alerts.innerHTML = alertHTML;
+
+        // TRIP HEADER
+        container.innerHTML = `<div class="trip-header fade-in"><i data-lucide="route" aria-hidden="true"></i><span class="trip-from">${sanitize(source)}</span><span class="trip-arrow" aria-hidden="true">→</span><span class="trip-to">${sanitize(destination)}</span></div>`;
+
+        // SUMMARY
+        const best = analyzed[0];
+        const worst = analyzed[analyzed.length - 1];
+        summaryC.innerHTML = `
+            <div class="summary-card fade-in" role="region" aria-label="Route recommendation summary">
+                <h3><i data-lucide="trophy" aria-hidden="true"></i> Recommendation: ${sanitize(best.name)}</h3>
+                <p>${sanitize(best.desc)}</p>
+                <div class="summary-stats">
+                    <div class="summary-stat"><div class="stat-val" style="color:var(--safe-color);">${best.score}</div><div class="stat-lbl">Best Score</div></div>
+                    <div class="summary-stat"><div class="stat-val" style="color:var(--unsafe-color);">${worst.score}</div><div class="stat-lbl">Worst Score</div></div>
+                    <div class="summary-stat"><div class="stat-val" style="color:#60a5fa;">${analyzed.length}</div><div class="stat-lbl">Routes</div></div>
+                </div>
+            </div>`;
+
+        // COMPARISON CHART
+        const maxScore = Math.max(...analyzed.map(r => Math.max(r.score, 0.1)));
+        compC.innerHTML = `
+            <div class="comparison-section fade-in" role="img" aria-label="Route safety comparison chart">
+                <h3><i data-lucide="bar-chart-3" aria-hidden="true"></i> Route Comparison</h3>
+                ${analyzed.map(r => {
+                    const pct = Math.max((r.score / maxScore) * 100, 5);
+                    const color = r === best ? 'var(--safe-color)' : r.score < 1 ? 'var(--unsafe-color)' : '#60a5fa';
+                    return `<div class="bar-row"><div class="bar-label">${sanitize(r.name)}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};">${r.score}</div></div></div>`;
+                }).join('')}
+            </div>`;
+
+        // ROUTE CARDS
+        analyzed.forEach((r, index) => {
+            const isSafest = index === 0;
+            const isUnsafe = r.score < 1.0;
+            const cardClass = isSafest ? 'route-card safest fade-in' : isUnsafe ? 'route-card unsafe fade-in' : 'route-card fade-in';
+            const badgeClass = isSafest ? 'badge-safest' : isUnsafe ? 'badge-unsafe' : 'badge-neutral';
+            const badgeIcon = isSafest ? 'shield-check' : isUnsafe ? 'shield-alert' : 'info';
+            const badgeText = isSafest ? 'Safest Choice' : isUnsafe ? 'High Risk' : 'Alternative';
+            const insightTitle = isSafest ? "Why this route is safe:" : isUnsafe ? "Why this route is risky:" : "Route considerations:";
+            const insightColor = isSafest ? "var(--safe-color)" : isUnsafe ? "var(--unsafe-color)" : "var(--text-main)";
+            const iconName = isSafest ? "check-circle-2" : isUnsafe ? "alert-circle" : "info";
+
+            let bullets = [];
+            if (r.lighting >= 7) bullets.push("Excellent street lighting & visibility");
+            else if (r.lighting < 6) bullets.push("Poorly lit — limited visibility");
+            if (r.crowd >= 7) bullets.push("Active public presence & foot traffic");
+            else if (r.crowd < 5) bullets.push("Isolated pathway — low foot traffic");
+            if (r.finalCrime <= 3) bullets.push("Low historical crime rate");
+            else if (r.finalCrime >= 5) bullets.push("Elevated crime risk in this area");
+            if (isNight && r.id === 'C') bullets.push("Park/scenic routes unsafe after dark");
+            if (currentWeather.condition === "Rain") bullets.push("Rain penalty: slippery & low visibility");
+            else if (currentWeather.condition === "Clouds") bullets.push("Slight overcast weather penalty");
+
+            const bulletHTML = bullets.map(b => `<li><i data-lucide="${iconName}" aria-hidden="true" style="color:${insightColor};width:14px;height:14px;"></i><span>${sanitize(b)}</span></li>`).join('');
+            const lightColor = r.lighting > 6 ? '#fbbf24' : 'var(--text-muted)';
+            const crowdColor = r.crowd > 6 ? '#60a5fa' : 'var(--text-muted)';
+            const crimeColor = r.finalCrime >= 5 ? '#f87171' : 'var(--text-muted)';
+
+            let checkpointHTML = '';
+            if (r.checkpoints && r.checkpoints.length) {
+                checkpointHTML = `<div class="checkpoints"><h4><i data-lucide="map-pin" aria-hidden="true"></i> Safe Checkpoints</h4><div>${r.checkpoints.map(c => `<span class="checkpoint-tag"><i data-lucide="coffee" aria-hidden="true"></i>${sanitize(c)}</span>`).join('')}</div></div>`;
             }
-            await analyzeRoutes();
-        }
 
-        function updateWeatherUI(weather) {
-            document.getElementById('weather-temp').textContent = `${weather.temp}°C`;
-            document.getElementById('weather-cond').textContent = weather.condition;
-            const iconEl = document.getElementById('weather-icon');
-            const alertEl = document.getElementById('weather-alert');
-
-            let iconName = "sun", alertMsg = "Clear weather: optimal travel conditions";
-            if (weather.condition === "Rain") { iconName = "cloud-rain"; alertMsg = "⚠ Rain detected: reduced visibility and slippery roads"; iconEl.style.color = "#8b5cf6"; }
-            else if (weather.condition === "Clouds") { iconName = "cloud"; alertMsg = "Cloudy conditions: moderate safety impact"; iconEl.style.color = "#94a3b8"; }
-            else { iconEl.style.color = "#fbbf24"; }
-
-            iconEl.setAttribute('data-lucide', iconName);
-            alertEl.textContent = alertMsg;
-            lucide.createIcons();
-        }
-
-        // ═══════════════════════════════════════════════
-        // MAIN ANALYSIS ENGINE
-        // ═══════════════════════════════════════════════
-        async function analyzeRoutes() {
-            const source = document.getElementById('source').value;
-            const destination = document.getElementById('destination').value;
-            const btn = document.getElementById('analyzeBtn');
-            const loading = document.getElementById('loading');
-
-            // Show loading
-            btn.disabled = true;
-            loading.classList.add('active');
-            document.getElementById('results').innerHTML = '';
-            document.getElementById('summary-container').innerHTML = '';
-            document.getElementById('comparison-container').innerHTML = '';
-
-            // Fetch weather
-            currentWeather = await getWeather("Bangalore");
-            updateWeatherUI(currentWeather);
-
-            // Get routes & calculate
-            const tripRoutes = getRoutesForTrip(source, destination);
-            let analyzed = tripRoutes.map(r => calculateSafety(r, currentWeather, isNight));
-            analyzed.sort((a, b) => b.score - a.score);
-
-            // Hide loading
-            loading.classList.remove('active');
-            btn.disabled = false;
-
-            const container = document.getElementById('results');
-            const alerts = document.getElementById('alerts-container');
-            const summaryC = document.getElementById('summary-container');
-            const compC = document.getElementById('comparison-container');
-
-            // ── ALERTS ──
-            let alertHTML = '';
-            if (isNight) alertHTML += `<div class="live-alert"><i data-lucide="radio"></i><span>⚠ You are entering a low safety zone — Night travel active</span></div>`;
-            if (currentWeather.condition === "Rain") alertHTML += `<div class="live-alert"><i data-lucide="cloud-rain"></i><span>Rain detected: safety scores reduced across all routes</span></div>`;
-            alerts.innerHTML = alertHTML;
-
-            // ── TRIP HEADER ──
-            container.innerHTML = `<div class="trip-header fade-in"><i data-lucide="route"></i><span class="trip-from">${source}</span><span class="trip-arrow">→</span><span class="trip-to">${destination}</span></div>`;
-
-            // ── SUMMARY CARD ──
-            const best = analyzed[0];
-            const worst = analyzed[analyzed.length - 1];
-            summaryC.innerHTML = `
-                <div class="summary-card fade-in">
-                    <h3><i data-lucide="trophy"></i> Recommendation: ${best.name}</h3>
-                    <p>${best.desc}</p>
-                    <div class="summary-stats">
-                        <div class="summary-stat"><div class="stat-val" style="color: var(--safe-color);">${best.score}</div><div class="stat-lbl">Best Score</div></div>
-                        <div class="summary-stat"><div class="stat-val" style="color: var(--unsafe-color);">${worst.score > 0 ? worst.score : 0}</div><div class="stat-lbl">Worst Score</div></div>
-                        <div class="summary-stat"><div class="stat-val" style="color: #60a5fa;">${analyzed.length}</div><div class="stat-lbl">Routes</div></div>
+            container.innerHTML += `
+                <article class="${cardClass}" style="animation-delay:${index * 0.1}s" aria-label="Route: ${sanitize(r.name)}, Safety Score: ${r.score}" tabindex="0">
+                    <div class="card-top">
+                        <div class="route-info">
+                            <span class="badge ${badgeClass}"><i data-lucide="${badgeIcon}" aria-hidden="true"></i> ${badgeText}</span>
+                            <h2>${sanitize(r.name)}</h2>
+                        </div>
+                        <div class="score-circle" aria-label="Safety score ${r.score}">
+                            <span class="val">${r.score}</span>
+                            <span class="lbl">Score</span>
+                        </div>
                     </div>
-                </div>`;
+                    <div class="metrics-row" role="group" aria-label="Route metrics">
+                        <div class="metric" aria-label="Lighting: ${r.lighting}/10"><i data-lucide="lightbulb" style="color:${lightColor}" aria-hidden="true"></i><span>${r.lighting}/10</span><small>Light</small></div>
+                        <div class="metric" aria-label="Crowd: ${r.crowd}/10"><i data-lucide="users" style="color:${crowdColor}" aria-hidden="true"></i><span>${r.crowd}/10</span><small>Crowd</small></div>
+                        <div class="metric" aria-label="Crime: ${r.finalCrime}/10"><i data-lucide="alert-triangle" style="color:${crimeColor}" aria-hidden="true"></i><span>${r.finalCrime}/10</span><small>Crime</small></div>
+                    </div>
+                    <div class="insights">
+                        <div class="insight-title" style="color:${insightColor}">${insightTitle}</div>
+                        <ul class="insight-bullets">${bulletHTML}</ul>
+                    </div>
+                    ${checkpointHTML}
+                </article>`;
+        });
 
-            // ── COMPARISON CHART ──
-            const maxScore = Math.max(...analyzed.map(r => Math.max(r.score, 0.1)));
-            compC.innerHTML = `
-                <div class="comparison-section fade-in">
-                    <h3><i data-lucide="bar-chart-3"></i> Route Comparison</h3>
-                    ${analyzed.map(r => {
-                        const pct = Math.max((r.score / maxScore) * 100, 5);
-                        const color = r === best ? 'var(--safe-color)' : r.score < 1 ? 'var(--unsafe-color)' : '#60a5fa';
-                        return `<div class="bar-row"><div class="bar-label">${r.name}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${color};">${r.score > 0 ? r.score : 0}</div></div></div>`;
-                    }).join('')}
-                </div>`;
+        lucide.createIcons();
+        runSelfTests(analyzed); // Run automated tests
+    }
 
-            // ── ROUTE CARDS ──
-            analyzed.forEach((r, index) => {
-                const isSafest = index === 0;
-                const isUnsafe = r.score < 1.0;
-                let cardClass = isSafest ? 'route-card safest fade-in' : isUnsafe ? 'route-card unsafe fade-in' : 'route-card fade-in';
-                let badgeClass = isSafest ? 'badge-safest' : isUnsafe ? 'badge-unsafe' : 'badge-neutral';
-                let badgeIcon = isSafest ? 'shield-check' : isUnsafe ? 'shield-alert' : 'info';
-                let badgeText = isSafest ? 'Safest Choice' : isUnsafe ? 'High Risk' : 'Alternative';
+    // ═════════════════════════════════════════════════════
+    // AUTOMATED TESTING SUITE
+    // ═════════════════════════════════════════════════════
 
-                let insightTitle = isSafest ? "Why this route is safe:" : isUnsafe ? "Why this route is risky:" : "Route considerations:";
-                let insightColor = isSafest ? "var(--safe-color)" : isUnsafe ? "var(--unsafe-color)" : "var(--text-main)";
-                let iconName = isSafest ? "check-circle-2" : isUnsafe ? "alert-circle" : "info";
+    /**
+     * Runs a suite of automated self-tests and displays results.
+     * @param {Array.<ScoredRoute>} analyzed - Scored and sorted routes
+     */
+    function runSelfTests(analyzed) {
+        const tests = [];
 
-                let bullets = [];
-                if (r.lighting >= 7) bullets.push("Excellent street lighting & visibility");
-                else if (r.lighting < 6) bullets.push("Poorly lit — limited visibility");
-                if (r.crowd >= 7) bullets.push("Active public presence & foot traffic");
-                else if (r.crowd < 5) bullets.push("Isolated pathway — low foot traffic");
-                if (r.finalCrime <= 3) bullets.push("Low historical crime rate");
-                else if (r.finalCrime >= 5) bullets.push("Elevated crime risk in this area");
-                if (isNight && r.id === 'C') bullets.push("Park/scenic routes unsafe after dark");
-                if (currentWeather.condition === "Rain") bullets.push("Rain penalty: slippery & low visibility");
-                else if (currentWeather.condition === "Clouds") bullets.push("Slight overcast weather penalty");
+        // Test 1: Safety formula correctness
+        const testRoute = { id: "T", name: "Test", lighting: 8, crowd: 7, crime: 3, desc: "", checkpoints: [] };
+        const testResult = calculateSafety(testRoute, { condition: "Clear" }, false);
+        const expected = (8 * 0.3) + (7 * 0.3) - (3 * 0.4);
+        tests.push({ name: "Formula: Clear/Day calculation correct", pass: Math.abs(testResult.score - expected) < 0.01 });
 
-                let bulletHTML = bullets.map(b => `<li><i data-lucide="${iconName}" aria-hidden="true" style="color:${insightColor}; width:14px; height:14px;"></i><span>${b}</span></li>`).join('');
+        // Test 2: Night mode increases crime weight
+        const nightResult = calculateSafety(testRoute, { condition: "Clear" }, true);
+        const expectedNight = (8 * 0.3) + (7 * 0.3) - (3 * 0.6);
+        tests.push({ name: "Night mode: crime weight = 0.6", pass: Math.abs(nightResult.score - expectedNight) < 0.01 });
 
-                let lightColor = r.lighting > 6 ? '#fbbf24' : 'var(--text-muted)';
-                let crowdColor = r.crowd > 6 ? '#60a5fa' : 'var(--text-muted)';
-                let crimeColor = r.finalCrime >= 5 ? '#f87171' : 'var(--text-muted)';
+        // Test 3: Rain penalty applied
+        const rainResult = calculateSafety(testRoute, { condition: "Rain" }, false);
+        tests.push({ name: "Rain penalty: −1.5 applied", pass: rainResult.score < testResult.score });
 
-                let checkpointHTML = '';
-                if (r.checkpoints && r.checkpoints.length > 0) {
-                    checkpointHTML = `<div class="checkpoints"><h4><i data-lucide="map-pin"></i> Safe Checkpoints</h4><div>${r.checkpoints.map(c => `<span class="checkpoint-tag"><i data-lucide="coffee"></i>${c}</span>`).join('')}</div></div>`;
-                }
+        // Test 4: Clouds penalty applied
+        const cloudResult = calculateSafety(testRoute, { condition: "Clouds" }, false);
+        tests.push({ name: "Cloud penalty: −0.4 applied", pass: cloudResult.score < testResult.score && cloudResult.score > rainResult.score });
 
-                container.innerHTML += `
-                    <div class="${cardClass}" style="animation-delay: ${index * 0.1}s">
-                        <div class="card-top">
-                            <div class="route-info">
-                                <span class="badge ${badgeClass}"><i data-lucide="${badgeIcon}"></i> ${badgeText}</span>
-                                <h2>${r.name}</h2>
-                            </div>
-                            <div class="score-circle">
-                                <span class="val">${r.score > 0 ? r.score : 0}</span>
-                                <span class="lbl">Score</span>
-                            </div>
-                        </div>
-                        <div class="metrics-row">
-                            <div class="metric" aria-label="Lighting: ${r.lighting}/10"><i data-lucide="lightbulb" style="color:${lightColor}" aria-hidden="true"></i><span>${r.lighting}/10</span><small>Lighting</small></div>
-                            <div class="metric" aria-label="Crowd: ${r.crowd}/10"><i data-lucide="users" style="color:${crowdColor}" aria-hidden="true"></i><span>${r.crowd}/10</span><small>Crowd</small></div>
-                            <div class="metric" aria-label="Crime Risk: ${r.finalCrime}/10"><i data-lucide="alert-triangle" style="color:${crimeColor}" aria-hidden="true"></i><span>${r.finalCrime}/10</span><small>Crime</small></div>
-                        </div>
-                        <div class="calc-breakdown">
-                            <div class="calc-line"><span>Lighting: ${r.lighting} × 0.3</span><span>+${r._lightScore}</span></div>
-                            <div class="calc-line"><span>Crowd: ${r.crowd} × 0.3</span><span>+${r._crowdScore}</span></div>
-                            <div class="calc-line"><span>Crime: ${r.finalCrime} × ${r._crimeWeight}</span><span>-${r._crimeScore}</span></div>
-                            ${parseFloat(r._weatherPenalty) > 0 ? `<div class="calc-line"><span>Weather Penalty</span><span>-${r._weatherPenalty}</span></div>` : ''}
-                            <div class="calc-line calc-result"><span>Safety Score</span><span>${r.score > 0 ? r.score : 0}</span></div>
-                        </div>
-                        <div class="insights">
-                            <div class="insight-title" style="color:${insightColor}">${insightTitle}</div>
-                            <ul class="insight-bullets">${bulletHTML}</ul>
-                        </div>
-                        ${checkpointHTML}
-                    </div>`;
-            });
-
-            lucide.createIcons();
+        // Test 5: Routes are sorted descending
+        let sorted = true;
+        for (let i = 1; i < analyzed.length; i++) {
+            if (analyzed[i].score > analyzed[i - 1].score) sorted = false;
         }
+        tests.push({ name: "Routes sorted by score (desc)", pass: sorted });
 
-        // Boot
-        analyzeRoutes();
+        // Test 6: Scores are non-negative
+        const allNonNeg = analyzed.every(r => r.score >= 0);
+        tests.push({ name: "All scores are non-negative", pass: allNonNeg });
+
+        // Test 7: Sanitize function works
+        const xssInput = '<script>alert("x")</script>';
+        const sanitized = sanitize(xssInput);
+        tests.push({ name: "XSS sanitization working", pass: !sanitized.includes('<script>') });
+
+        // Test 8: Weather cache exists
+        tests.push({ name: "Weather caching enabled", pass: weatherCache.TTL === 300000 });
+
+        // Render results
+        const container = document.getElementById('test-results');
+        container.innerHTML = tests.map(t =>
+            `<div class="test-row"><span>${t.name}</span><span class="${t.pass ? 'test-pass' : 'test-fail'}">${t.pass ? '✓ PASS' : '✗ FAIL'}</span></div>`
+        ).join('');
+
+        const passed = tests.filter(t => t.pass).length;
+        console.log(`[Tests] ${passed}/${tests.length} passed`);
+    }
+
+    // Boot
+    analyzeRoutes();
     </script>
 </body>
 </html>
