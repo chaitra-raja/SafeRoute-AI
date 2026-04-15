@@ -185,17 +185,10 @@
         .checkpoint-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); padding: 5px 12px; border-radius: 10px; font-size: 0.78em; color: #93c5fd; margin: 0 6px 8px 0; }
         .checkpoint-tag svg { width: 12px; height: 12px; }
 
-        /* ── Tests (collapsible at bottom) ── */
-        .test-panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px 20px; margin-bottom: 18px; position: relative; z-index: 1; }
-        .test-panel h3 { margin: 0; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .test-panel h3 svg { width: 16px; height: 16px; }
-        .test-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-        .test-body.open { max-height: 500px; margin-top: 12px; }
-        .test-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.82em; }
-        .test-row:last-child { border-bottom: none; }
-        .test-pass { color: var(--safe-color); font-weight: 600; }
-        .test-fail { color: var(--unsafe-color); font-weight: 600; }
-        .test-summary { font-size: 0.8em; color: var(--text-muted); margin-top: 4px; }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+        .fade-in { animation: fadeInUp 0.5s ease-out forwards; }
+        .test-panel { display: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px 20px; margin-bottom: 18px; position: relative; z-index: 1; }
+        .test-active { display: block; }
 
         /* ── Loading ── */
         .loading-overlay { display: none; position: relative; z-index: 1; text-align: center; padding: 40px 0; }
@@ -285,17 +278,6 @@
             </button>
         </div>
 
-        <!-- Formula -->
-        <section class="formula-card" aria-label="Safety scoring formula">
-            <h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg> AI Safety Formula</h3>
-            <div class="formula-text">
-                Score = (Light × 0.3) + (Crowd × 0.3)<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; − (Crime × <span id="crime-weight-display">0.4</span>)<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; − Weather Penalty
-            </div>
-            <div class="formula-note"><span>Night Mode:</span> Crime weight → 0.6 &nbsp;|&nbsp; <span>Rain:</span> −1.5 &nbsp;|&nbsp; <span>Clouds:</span> −0.4</div>
-        </section>
-
         <!-- Google Maps -->
         <section class="map-section" aria-label="Map of Bangalore">
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d248849.84916296514!2d77.46612593378655!3d12.953847714498672!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670c9b44e6d%3A0xf8dfc3e8517e4fe0!2sBengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Map of Bangalore"></iframe>
@@ -312,11 +294,11 @@
 
         <!-- Tests (collapsible) -->
         <section class="test-panel" id="test-panel">
-            <h3 onclick="document.getElementById('test-body').classList.toggle('open')">
+            <h3 onclick="document.getElementById('test-body').classList.toggle('open')" style="margin: 0; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; color: #60a5fa; display: flex; align-items: center; gap: 8px; cursor: pointer;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg>
                 Self-Test Results ▾
             </h3>
-            <div id="test-body" class="test-body"><div id="test-results"></div></div>
+            <div id="test-body" class="test-body" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease;"><div id="test-results"></div></div>
         </section>
 
         <footer class="footer">SafeRoute AI v3.0 — Prototype Demo • PromptWars 2026</footer>
@@ -443,23 +425,34 @@
     async function _run() {
         const src = document.getElementById('source').value, dst = document.getElementById('destination').value;
         const btn = document.getElementById('analyzeBtn'), ld = document.getElementById('loading');
-        btn.disabled = true; ld.classList.add('active');
-        document.getElementById('results').innerHTML = '';
-        document.getElementById('summary-container').innerHTML = '';
-        document.getElementById('comparison-container').innerHTML = '';
+        
+        // Optimistic UI: Initial render with default weather so user sees results instantly
+        renderResults(src, dst, currentWeather, isNight);
 
-        currentWeather = await getWeather("Bangalore");
-        updateWeatherUI(currentWeather);
-        let analyzed = getRoutesForTrip(src, dst).map(r => calculateSafety(r, currentWeather, isNight));
+        // Fetch weather in background
+        getWeather("Bangalore").then(w => {
+            currentWeather = w;
+            updateWeatherUI(w);
+            renderResults(src, dst, w, isNight); // Re-render with real weather
+        });
+
+        // Toggle test panel once first analysis is done
+        document.getElementById('test-panel').classList.add('test-active');
+    }
+
+    function renderResults(src, dst, weather, night) {
+        const container = document.getElementById('results'), summaryC = document.getElementById('summary-container'), compC = document.getElementById('comparison-container'), alerts = document.getElementById('alerts-container');
+        
+        let analyzed = getRoutesForTrip(src, dst).map(r => calculateSafety(r, weather, night));
         analyzed.sort((a, b) => b.score - a.score);
 
-        ld.classList.remove('active'); btn.disabled = false;
-        const container = document.getElementById('results'), alerts = document.getElementById('alerts-container');
+        // Clear containers
+        container.innerHTML = ''; summaryC.innerHTML = ''; compC.innerHTML = ''; alerts.innerHTML = '';
 
         // Alerts
         let ah = '';
-        if (isNight) ah += `<div class="live-alert" role="alert"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>⚠ Night travel — elevated safety risk</span></div>`;
-        if (currentWeather.condition === "Rain") ah += `<div class="live-alert" role="alert"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg><span>Rain: all safety scores reduced</span></div>`;
+        if (night) ah += `<div class="live-alert" role="alert"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>⚠ Night travel — elevated safety risk</span></div>`;
+        if (weather.condition === "Rain") ah += `<div class="live-alert" role="alert"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg><span>Rain: all safety scores reduced</span></div>`;
         alerts.innerHTML = ah;
 
         // Trip header
@@ -467,11 +460,11 @@
 
         // Summary
         const best = analyzed[0], worst = analyzed[analyzed.length - 1];
-        document.getElementById('summary-container').innerHTML = `<div class="summary-card fade-in"><h3><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> Recommendation: ${sanitize(best.name)}</h3><p>${sanitize(best.desc)}</p><div class="summary-stats"><div class="summary-stat"><div class="stat-val" style="color:var(--safe-color)">${best.score}</div><div class="stat-lbl">Best Score</div></div><div class="summary-stat"><div class="stat-val" style="color:var(--unsafe-color)">${worst.score}</div><div class="stat-lbl">Worst Score</div></div><div class="summary-stat"><div class="stat-val" style="color:#60a5fa">${analyzed.length}</div><div class="stat-lbl">Routes</div></div></div></div>`;
+        summaryC.innerHTML = `<div class="summary-card fade-in"><h3><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> Recommendation: ${sanitize(best.name)}</h3><p>${sanitize(best.desc)}</p><div class="summary-stats"><div class="summary-stat"><div class="stat-val" style="color:var(--safe-color)">${best.score}</div><div class="stat-lbl">Best Score</div></div><div class="summary-stat"><div class="stat-val" style="color:var(--unsafe-color)">${worst.score}</div><div class="stat-lbl">Worst Score</div></div><div class="summary-stat"><div class="stat-val" style="color:#60a5fa">${analyzed.length}</div><div class="stat-lbl">Routes</div></div></div></div>`;
 
         // Comparison
         const mx = Math.max(...analyzed.map(r => Math.max(r.score, 0.1)));
-        document.getElementById('comparison-container').innerHTML = `<div class="comparison-section fade-in"><h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/></svg> Route Comparison</h3>${analyzed.map(r => { const p = Math.max((r.score / mx) * 100, 5); const c = r === best ? 'var(--safe-color)' : r.score < 1 ? 'var(--unsafe-color)' : '#60a5fa'; return `<div class="bar-row"><div class="bar-label">${sanitize(r.name)}</div><div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${c};">${r.score}</div></div></div>`; }).join('')}</div>`;
+        compC.innerHTML = `<div class="comparison-section fade-in"><h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/></svg> Route Comparison</h3>${analyzed.map(r => { const p = Math.max((r.score / mx) * 100, 5); const c = r === best ? 'var(--safe-color)' : r.score < 1 ? 'var(--unsafe-color)' : '#60a5fa'; return `<div class="bar-row"><div class="bar-label">${sanitize(r.name)}</div><div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${c};">${r.score}</div></div></div>`; }).join('')}</div>`;
 
         // Route cards
         analyzed.forEach((r, i) => {
@@ -486,9 +479,9 @@
             if (r.lighting >= 7) bul.push("Excellent street lighting"); else if (r.lighting < 6) bul.push("Poorly lit area");
             if (r.crowd >= 7) bul.push("Active public presence"); else if (r.crowd < 5) bul.push("Isolated pathway");
             if (r.finalCrime <= 3) bul.push("Low crime rate"); else if (r.finalCrime >= 5) bul.push("Elevated crime risk");
-            if (isNight && r.id === 'C') bul.push("Scenic routes unsafe at night");
-            if (currentWeather.condition === "Rain") bul.push("Rain penalty applied");
-            else if (currentWeather.condition === "Clouds") bul.push("Overcast weather penalty");
+            if (night && r.id === 'C') bul.push("Scenic routes unsafe at night");
+            if (weather.condition === "Rain") bul.push("Rain penalty applied");
+            else if (weather.condition === "Clouds") bul.push("Overcast weather penalty");
             const bullHTML = bul.map(b => `<li><span style="color:${ic};font-weight:700;font-size:1.1em;">${bi}</span> <span>${sanitize(b)}</span></li>`).join('');
             const lc = r.lighting > 6 ? '#fbbf24' : 'var(--text-muted)', cc = r.crowd > 6 ? '#60a5fa' : 'var(--text-muted)', crc = r.finalCrime >= 5 ? '#f87171' : 'var(--text-muted)';
             let cpHTML = '';
